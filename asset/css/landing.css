@@ -286,10 +286,10 @@ p {
 
 .btn {
     --text-opacity: 1;
-    color: var(--White);
+    background-color: white; 
 
     --bg-opacity: 1;
-    background-color: var(--Bright-Blue);
+    border: 2px solid var(--Bright-Blue); 
     padding-left: 2.5rem;
     padding-right: 2.5rem;
     padding-top: 0.75rem;
@@ -297,6 +297,10 @@ p {
     border-radius: 9999px;
     transition-duration: 300ms;
     font-family: 'ProximaNovaBold';
+}
+.btn:hover {
+    background-color: var(--Bright-Blue); /* Fondo azul en hover */
+    color: white; /* Texto blanco en hover */
 }
 .w-3\/4{
     width: 75%;

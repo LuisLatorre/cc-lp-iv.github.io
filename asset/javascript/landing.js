@@ -99,23 +99,26 @@ scene.add(overlay)
 /**
  * GLTF Model
  */
-let anuncio = null
+let anuncio = null;
 
 gltfLoader.load(
     './asset/billboard/Pantalla_12x6.glb',
     (gltf) => {
-        console.log(gltf);
+        anuncio = gltf.scene;
+        const radius = 0.0090;
 
-        anuncio = gltf.scene
+        anuncio.scale.set(radius*1.5, radius, radius*1.5); 
 
-        anuncio.position.x = 1.5
-        anuncio.rotation.x = -0.1
-        anuncio.rotation.y = -2.1
-        
-        const radius = 0.0090
-        anuncio.scale.set(radius*1.5, radius, radius*1.5)
-
-        scene.add(anuncio)
+        if (isMobile()) {
+            anuncio.position.set(0, 0.5, 0);
+            anuncio.rotation.set(-0.1, -2.1, 0); 
+            scene.add(anuncio);
+            animateAnuncioOnMobile();
+        } else {
+            anuncio.position.set(1.5, 0.5, 0);
+            anuncio.rotation.set(-0.1, -2.1, 0);
+            scene.add(anuncio);
+        }
     },
     (progress) => {
         console.log(progress);
@@ -123,8 +126,7 @@ gltfLoader.load(
     (error) => {
         console.error(error);
     }
-)
-
+);
 /**
  * Light
  */
@@ -195,39 +197,36 @@ const animateAnuncioOnMobile = () => {
     anuncio.position.set(0, 0.5, 0);
     sphereShadow.position.set(anuncio.position.x, -1, anuncio.position.z);
 
-    // Cancela cualquier animación previa
     gsap.killTweensOf(anuncio.rotation);
     gsap.killTweensOf(sphereShadow.position);
 
-    // Anima la rotación sutil en el eje Z
     gsap.to(anuncio.rotation, {
-        z: "+=0.05", // Rotar sutilmente en Z
-        repeat: -1, // Repetir indefinidamente
-        yoyo: true, // Volver a la posición original antes de repetir
+        z: "+=0.05",
+        repeat: -1, 
+        yoyo: true, 
         duration: 2,
         ease: "sine.inOut"
     });
 
-    mobileAnimationExecuted = true; // Asegura que la animación se ejecute una sola vez
+    mobileAnimationExecuted = true;
 };
 
 
 window.addEventListener('resize', debounce(() => {
-    // Verifica si el tamaño de la ventana corresponde a un dispositivo móvil
     if (isMobile()) {
         if (!mobileAnimationExecuted) {
             animateAnuncioOnMobile();
         }
     } else {
-        // Si no es móvil, restablece la animación ejecutada para permitir que se ejecute de nuevo si se cambia a móvil
-        mobileAnimationExecuted = false;
+        if (mobileAnimationExecuted) {
+            gsap.killTweensOf(anuncio.rotation);
+            mobileAnimationExecuted = false;
+        }
     }
-    // También maneja la actualización de la cámara y el renderizador para la nueva dimensión de la ventana
     onWindowResize();
 }, 250));
 
 window.addEventListener('scroll', () => {
-    // Si la pantalla es móvil, no hacer nada en el evento de scroll
     if (isMobile()) return;
 
     scrollY = window.scrollY;
@@ -265,7 +264,6 @@ window.addEventListener('scroll', () => {
 });
 
 
-// Debounce function para optimizar el rendimiento durante el evento de resize
 function debounce(func, wait, immediate) {
     var timeout;
     return function() {
@@ -344,8 +342,6 @@ function onWindowResize() {
     // Actualizar el tamaño del renderizador
     renderer.setSize(window.innerWidth, window.innerHeight);
 
-    // Ajustar cualquier otro elemento que necesite responder al cambio de tamaño
 }
-
 // Escuchar el evento de redimensionamiento y ejecutar la función definida
 window.addEventListener('resize', onWindowResize, false);
